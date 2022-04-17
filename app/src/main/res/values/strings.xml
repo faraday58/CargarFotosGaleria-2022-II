@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="strTitulo">Introduce el título</string>
+    <string name="strDescripcion">Ingresa la descripción</string>
+</resources>
