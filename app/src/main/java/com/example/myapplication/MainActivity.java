@@ -109,6 +109,11 @@ public class MainActivity extends AppCompatActivity {
                     Bitmap bitmap= BitmapFactory.decodeFile(mRuta);
                     imgvProducto.setImageBitmap(bitmap);
                     break;
+
+                case IMAGEN_SELECCIONADA:
+                    Uri directorio= data.getData();
+                    imgvProducto.setImageURI(directorio);
+                    break;
             }
         }
 
