@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUERIR_CODIOG_PERMISO =30 ;
     AppCompatButton btnAgregarImagen;
     AppCompatImageView imgvProducto;
-    private String mRuta;
+
 
 
     @Override
