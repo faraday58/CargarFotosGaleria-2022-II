@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,19 +22,31 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
     //Constantes que definen el nombre y la ruta de las fotos guardadas por la cámara
-
     private static final int CODIGO_FOTO =20;
     private static final int IMAGEN_SELECCIONADA = 12;
     private static final int REQUERIR_CODIOG_PERMISO =30 ;
     AppCompatButton btnAgregarImagen;
     AppCompatImageView imgvProducto;
-
+    AppCompatButton btnAgregarProducto;
+    EditText edtTitulo ;
+    EditText edtDescripcion;
+    String urlImagen="";
+    private StorageReference mStorageRef;
 
 
     @Override
@@ -42,7 +55,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         btnAgregarImagen = findViewById(R.id.btnAgregarImagen);
         imgvProducto= findViewById(R.id.imgvProducto);
+        btnAgregarProducto=findViewById(R.id.btnAgregarProducto);
+        edtTitulo=findViewById(R.id.edtTitulo);
+        edtDescripcion= findViewById(R.id.edtDescripcion);
+        mStorageRef= FirebaseStorage.getInstance("gs://tiendaapp-3a33b.appspot.com").getReference();
         btnAgregarImagen.setOnClickListener(onClickAgregaFoto);
+
     }
 
     View.OnClickListener onClickAgregaFoto  = view -> {
@@ -100,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if( resultCode == RESULT_OK)
+        if( resultCode == RESULT_OK && data != null && data.getData() != null )
         {
             switch (requestCode)
             {
@@ -115,7 +133,40 @@ public class MainActivity extends AppCompatActivity {
                     imgvProducto.setImageURI(directorio);
                     break;
             }
+            Uri filepath= data.getData(); //Obteniendo la uri de la imagen seleccionada
+            Log.d("Directorio","Obteniendo Uri");
+            final StorageReference filepathr=mStorageRef.child("productos").child(filepath.getLastPathSegment());
+            filepathr.putFile(filepath).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if(!task.isSuccessful())
+                    {
+                        throw new Exception();
+                    }
+                    return filepathr.getDownloadUrl();
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    if(task.isSuccessful())
+                    {
+                        Toast.makeText(getApplicationContext(), "Se subió correctamente la aplicación", Toast.LENGTH_SHORT).show();
+                        Uri downloadlink= task.getResult();
+                        urlImagen= downloadlink.toString();
+                        Log.d("Link","Link de descarga: " +urlImagen);
+                    }
+                }
+            });
+
         }
 
     }
+
+    View.OnClickListener onClickAProducto = View ->{
+
+
+
+    };
+
+
 }
