@@ -27,7 +27,11 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -47,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     EditText edtDescripcion;
     String urlImagen="";
     private StorageReference mStorageRef;
+    private FirebaseFirestore db;
 
 
     @Override
@@ -56,10 +61,13 @@ public class MainActivity extends AppCompatActivity {
         btnAgregarImagen = findViewById(R.id.btnAgregarImagen);
         imgvProducto= findViewById(R.id.imgvProducto);
         btnAgregarProducto=findViewById(R.id.btnAgregarProducto);
+
         edtTitulo=findViewById(R.id.edtTitulo);
         edtDescripcion= findViewById(R.id.edtDescripcion);
+        db= FirebaseFirestore.getInstance();
         mStorageRef= FirebaseStorage.getInstance("gs://tiendaapp-3a33b.appspot.com").getReference();
         btnAgregarImagen.setOnClickListener(onClickAgregaFoto);
+        btnAgregarProducto.setOnClickListener(onClickAProducto);
 
     }
 
@@ -163,6 +171,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     View.OnClickListener onClickAProducto = View ->{
+        String titulo = edtTitulo.getText().toString();
+        String descripcion= edtDescripcion.getText().toString();
+        Producto miProducto= new Producto(titulo,urlImagen,descripcion);
+        db.collection("Producto").document().set(miProducto).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+               edtDescripcion.setText("");
+               edtTitulo.setText("");
+               imgvProducto.setImageDrawable(getResources().getDrawable( R.drawable.tenis_tela));
+                Toast.makeText(MainActivity.this, "Se agregaron los elementos de forma correcta", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(MainActivity.this, "Oops, algo salió mal", Toast.LENGTH_SHORT).show();
+            }
+        });
+
 
 
 
